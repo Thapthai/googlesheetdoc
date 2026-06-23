@@ -1,0 +1,35 @@
+{
+  "name": "google-sheet-excel",
+  "version": "1.0.0",
+  "description": "Create Excel files from Google Sheets using TypeScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/server.js",
+    "dev": "npm run build && node dist/server.js",
+    "demo": "npm run build && node dist/index.js",
+    "create-excel": "npm run demo",
+    "report:fac-delivery": "npm run build && node dist/reports/report_fac_delivery_clean_xls.js",
+    "check-google": "npm run build && node dist/scripts/checkGoogleApi.js",
+    "cleanup-drive": "npm run build && node dist/scripts/cleanupDrive.js",
+    "auth-google": "npm run build && node dist/scripts/authGoogle.js"
+  },
+  "keywords": [
+    "google-sheets",
+    "excel",
+    "xlsx"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "googleapis": "^173.0.0",
+    "mysql2": "^3.22.5",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.0",
+    "typescript": "^6.0.3"
+  }
+}

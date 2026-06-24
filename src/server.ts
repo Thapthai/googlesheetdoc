@@ -1,12 +1,15 @@
 import "dotenv/config";
 import express, { Request, Response } from "express";
+import * as path from "path";
 import { formatGoogleApiError } from "./lib/googleApiError";
 import { exchangeCodeForTokens } from "./lib/googleOAuth";
+import { sendReportResponse } from "./lib/reportDownloadPage";
 import { reportServices } from "./reports/registerReports";
 import { QueryParams } from "./reports/types";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4100);
+const REPORTS_DIR = path.join(__dirname, "..", "reports");
 
 function queryToRecord(query: Request["query"]): QueryParams {
   const result: QueryParams = {};
@@ -49,24 +52,27 @@ app.get("/oauth2callback", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/reports/:fileName", (req: Request, res: Response) => {
+  const rawName = req.params.fileName;
+  const safeName = path.basename(
+    typeof rawName === "string" ? rawName : rawName[0] ?? ""
+  );
+  const filePath = path.join(REPORTS_DIR, safeName);
+  res.download(filePath, safeName, (err) => {
+    if (err && !res.headersSent) {
+      res.status(404).json({ error: "ไม่พบไฟล์" });
+    }
+  });
+});
+
 for (const report of reportServices) {
   app.get(report.route, async (req: Request, res: Response) => {
     try {
       const params = report.parseParamsFromQuery(queryToRecord(req.query));
       const result = await report.generate(params);
+      const downloadUrl = `/reports/${encodeURIComponent(result.fileName)}`;
 
-      if (result.spreadsheetUrl.startsWith("http")) {
-        res.setHeader("X-Spreadsheet-Url", result.spreadsheetUrl);
-      }
-
-      res.download(result.outputPath, result.fileName, (err) => {
-        if (err && !res.headersSent) {
-          res.status(500).json({
-            error: "ไม่สามารถส่งไฟล์ได้",
-            detail: String(err),
-          });
-        }
-      });
+      sendReportResponse(res, result, downloadUrl);
     } catch (error: unknown) {
       const message = formatGoogleApiError(error);
       res.status(500).json({ error: message });

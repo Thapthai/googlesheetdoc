@@ -6,13 +6,21 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/server.js",
+    "start:prod": "node dist/server.js",
     "dev": "npm run build && node dist/server.js",
     "demo": "npm run build && node dist/index.js",
     "create-excel": "npm run demo",
     "report:fac-delivery": "npm run build && node dist/reports/report_fac_delivery_clean_xls.js",
     "check-google": "npm run build && node dist/scripts/checkGoogleApi.js",
     "cleanup-drive": "npm run build && node dist/scripts/cleanupDrive.js",
-    "auth-google": "npm run build && node dist/scripts/authGoogle.js"
+    "auth-google": "npm run build && node dist/scripts/authGoogle.js",
+    "pm2:start": "npm run build && pm2 start ecosystem.config.cjs",
+    "pm2:restart": "npm run build && pm2 restart google-sheet-report --update-env",
+    "pm2:stop": "pm2 stop google-sheet-report",
+    "pm2:delete": "pm2 delete google-sheet-report",
+    "pm2:logs": "pm2 logs google-sheet-report",
+    "pm2:status": "pm2 status",
+    "deploy": "npm run build && pm2 restart google-sheet-report --update-env"
   },
   "keywords": [
     "google-sheets",
@@ -30,6 +38,7 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.0.0",
+    "pm2": "^6.0.14",
     "typescript": "^6.0.3"
   }
 }

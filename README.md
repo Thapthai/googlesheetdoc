@@ -165,7 +165,20 @@ Server จะสร้าง route อัตโนมัติจาก `registe
 | `npm run auth-google` | ขอ OAuth refresh token |
 | `npm run cleanup-drive` | ลบไฟล์ใน Drive ของ Service Account |
 
-แก้ปัญหา Google API: ดู [docs/GOOGLE_SETUP.md — แก้ปัญหา](docs/GOOGLE_SETUP.md#แก้ปัญหา-troubleshooting)
+แก้ปัญหา Google API: ดู [docs/GOOGLE_SETUP.md](docs/GOOGLE_SETUP.md#แก้ปัญหา-troubleshooting)
+
+---
+
+## Deploy ด้วย PM2 (Production)
+
+คู่มือฉบับเต็ม: **[docs/PM2_DEPLOY.md](docs/PM2_DEPLOY.md)**
+
+```bash
+npm install
+npm run pm2:start    # ครั้งแรก: build + start
+npm run deploy       # อัปเดตโค้ด: build + restart
+npm run pm2:logs     # ดู log
+```
 
 ### ใช้ข้อมูลตัวอย่างแทน MySQL
 

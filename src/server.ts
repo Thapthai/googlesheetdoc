@@ -4,8 +4,8 @@ import * as path from "path";
 import { formatGoogleApiError } from "./lib/googleApiError";
 import { exchangeCodeForTokens } from "./lib/googleOAuth";
 import { sendReportResponse } from "./lib/reportDownloadPage";
-import { reportServices } from "./reports/registerReports";
-import { QueryParams } from "./reports/types";
+import { reportServices } from "./report/registerReports";
+import { QueryParams } from "./report/types";
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 4100);

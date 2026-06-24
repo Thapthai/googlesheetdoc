@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { ReportResult } from "../reports/types";
+import { ReportResult } from "../report/types";
 
 function escapeHtml(value: string): string {
   return value

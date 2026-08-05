@@ -173,9 +173,12 @@ npx pm2 save
 
 ---
 
-## Reverse Proxy (Nginx) — ถ้า deploy บน server จริง
+## Reverse Proxy (Apache / Nginx)
 
-ตัวอย่าง proxy ไป port 4100:
+คู่มือฉบับเต็ม (รวม path `/demo-googledoc/mph/`, Apache, timeout, OAuth):  
+**[REVERSE_PROXY.md](REVERSE_PROXY.md)**
+
+สรุปสั้น — Nginx root path:
 
 ```nginx
 server {
@@ -193,12 +196,11 @@ server {
 }
 ```
 
-รายงานอาจใช้เวลาสร้าง Google Sheet นาน — ตั้ง `proxy_read_timeout` ให้เพียงพอ (เช่น 300 วินาที)
+Apache path prefix ตัวอย่าง (MPH — เผื่อมี `/demo-googledoc/gnk/` ฯลฯ ภายหลัง):
 
-ถ้าใช้ HTTPS + domain จริง ต้องเพิ่ม redirect URI ใน Google OAuth:
-
-```
-https://report.example.com/oauth2callback
+```apache
+ProxyPass        /demo-googledoc/mph/ http://10.11.9.3:7001/
+ProxyPassReverse /demo-googledoc/mph/ http://10.11.9.3:7001/
 ```
 
 ---

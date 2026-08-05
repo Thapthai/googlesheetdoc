@@ -1,7 +1,7 @@
 # Google Sheet Excel Report
 
 สร้างไฟล์ Excel ผ่าน Google Sheets API ด้วย TypeScript  
-รองรับรายงาน **Factory Delivery Clean** (แปลงจาก PHP)
+รองรับรายงาน **Factory Delivery Clean** และ **Hotel Delivery Soiled** (แปลงจาก PHP)
 
 ## ความต้องการของระบบ
 
@@ -76,6 +76,10 @@ http://localhost:4100/report_fac_delivery_clean_xls?typedate=2&sdate=01-06-2026&
 http://localhost:4100/report_fac_delivery_clean_xls?typedate=0&month=06-2026
 http://localhost:4100/report_fac_delivery_clean_xls?date=22-06-2026&price=1
 http://localhost:4100/report_fac_delivery_clean_xls?date=22-06-2026&lg=en
+
+http://localhost:4100/report_hotel_delivery_soiled_xls?date=22-06-2026
+http://localhost:4100/report_hotel_delivery_soiled_xls?typedate=0&month=06-2026&hotel_code=GNK
+http://localhost:4100/report_hotel_delivery_soiled_xls?typedate=2&sdate=01-06-2026&edate=22-06-2026&lg=en
 ```
 
 | Query param | คำอธิบาย |
@@ -84,9 +88,10 @@ http://localhost:4100/report_fac_delivery_clean_xls?date=22-06-2026&lg=en
 | `typedate` | 0=รายเดือน, 1=วันเดียว, 2=ช่วงวันที่ |
 | `sdate`, `edate` | วันที่เริ่ม-สิ้นสุด (dd-mm-yyyy) |
 | `month` | เดือน-ปี (mm-yyyy) |
-| `price` | 1=แสดงราคา |
+| `price` | 1=แสดงราคา (เฉพาะ fac delivery clean) |
 | `lg` | th หรือ en |
 | `itemcode` | รหัสรายการ |
+| `hotel_code` | รหัสโรงแรม (hotel soiled — ค่าเริ่มต้น `GNK`) |
 
 เปิด URL แล้ว browser จะดาวน์โหลดไฟล์ `.xlsx` อัตโนมัติ
 
@@ -127,7 +132,8 @@ googleSheet/
 │       ├── types.ts                 # interface ReportService
 │       ├── registerReports.ts       # ลงทะเบียนรายงานทั้งหมด
 │       └── services/
-│           └── report_fac_delivery_clean_xls/   # 1 รายงาน = 1 โฟลเดอร์
+│           ├── report_fac_delivery_clean_xls/   # 1 รายงาน = 1 โฟลเดอร์
+│           └── report_hotel_delivery_soiled_xls/
 │               ├── service.ts       # entry point + route
 │               ├── parseParams.ts
 │               ├── dataService.ts
@@ -171,7 +177,8 @@ Server จะสร้าง route อัตโนมัติจาก `registe
 
 ## Deploy ด้วย PM2 (Production)
 
-คู่มือฉบับเต็ม: **[docs/PM2_DEPLOY.md](docs/PM2_DEPLOY.md)**
+คู่มือฉบับเต็ม: **[docs/PM2_DEPLOY.md](docs/PM2_DEPLOY.md)**  
+Reverse proxy (Apache `/demo-googledoc/mph/`): **[docs/REVERSE_PROXY.md](docs/REVERSE_PROXY.md)**
 
 ```bash
 npm install

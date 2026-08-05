@@ -70,7 +70,8 @@ for (const report of reportServices) {
     try {
       const params = report.parseParamsFromQuery(queryToRecord(req.query));
       const result = await report.generate(params);
-      const downloadUrl = `/reports/${encodeURIComponent(result.fileName)}`;
+      // relative path — ทำงานทั้ง localhost และ reverse proxy เช่น /demo-googledoc/mph/
+      const downloadUrl = `reports/${encodeURIComponent(result.fileName)}`;
 
       sendReportResponse(res, result, downloadUrl);
     } catch (error: unknown) {

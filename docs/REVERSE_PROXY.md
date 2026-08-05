@@ -198,30 +198,37 @@ server {
 }
 ```
 
-แบบนี้ลิงก์ดาวน์โหลด `/reports/...` ทำงานครบโดยไม่ต้องตั้งค่าเพิ่ม
+แบบนี้ลิงก์ดาวน์โหลดทำงานครบโดยไม่ต้องตั้งค่าเพิ่ม
 
 ---
 
-
-
 ## ลิงก์ดาวน์โหลด Excel หลังสร้างรายงาน
 
-แอปสร้างลิงก์ดาวน์โหลดเป็น path แบบ absolute จาก root:
+แอปใช้ลิงก์แบบ **relative**:
 
 ```
-/reports/<ชื่อไฟล์>.xlsx
+reports/<ชื่อไฟล์>.xlsx
 ```
 
+เมื่อเปิดผ่าน prefix เช่น
 
-| วิธี proxy                          | ผลกับปุ่มดาวน์โหลด                                                       |
-| ----------------------------------- | ------------------------------------------------------------------------ |
-| **Root** (`/`)                      | ใช้ได้ปกติ                                                               |
-| **Prefix** (`/demo-googledoc/mph/`) | ปุ่มดาวน์โหลดชี้ไป `/reports/...` ที่ **นอก** prefix → อาจ 404 บน Apache |
+```
+http://<host>/demo-googledoc/mph/report_hotel_delivery_soiled_xls?...
+```
 
+ปุ่มดาวน์โหลดจะไปที่
 
-ทางเลือกเมื่อใช้ prefix:
+```
+http://<host>/demo-googledoc/mph/reports/<ชื่อไฟล์>.xlsx
+```
 
-1. **เพิ่ม proxy เฉพาะโฟลเดอร์ reports** (แก้เร็ว ไม่แก้โค้ด):
+ซึ่ง Apache จะตัด prefix แล้วส่งต่อไป `http://10.11.9.3:7001/reports/...` — **ไม่ต้อง** เพิ่ม `ProxyPass /reports/` แยก
+
+> ถ้ายังได้ Chrome error **"File wasn't available on site"** หลังอัปเดตโค้ดเก่าที่ยังใช้ `/reports/...` (ขึ้นต้นด้วย `/`) ให้ `git pull` + `npm run deploy` แล้วลองใหม่
+
+ทางเลือกสำรอง (โค้ดเก่าที่ยังใช้ absolute `/reports/...`):
+
+1. เพิ่ม proxy แยกสำหรับ `/reports/`:
 
 ```apache
 ProxyPass        /reports/ http://10.11.9.3:7001/reports/
@@ -235,13 +242,13 @@ location /reports/ {
 }
 ```
 
-1. เรียกดาวน์โหลดผ่าน prefix ด้วยมือ (ถ้ามีไฟล์แล้ว):
+2. เรียกดาวน์โหลดผ่าน prefix ด้วยมือ:
 
 ```
 http://<host>/demo-googledoc/mph/reports/<ชื่อไฟล์>.xlsx
 ```
 
-1. ใช้ปุ่ม **เปิด Google Sheet** เป็นหลัก (ไม่พึ่ง `/reports/`)
+3. ใช้ปุ่ม **เปิด Google Sheet** เป็นหลัก (ไม่พึ่งดาวน์โหลด xlsx)
 
 ---
 
@@ -306,9 +313,10 @@ GOOGLE_OAUTH_REDIRECT_URI=http://<host>/demo-googledoc/mph/oauth2callback
 
 เพิ่ม `ProxyTimeout 300` (Apache) หรือ `proxy_read_timeout 300s` (Nginx)
 
-### หน้า success แต่กดดาวน์โหลด 404
+### หน้า success แต่กดดาวน์โหลด 404 / "File wasn’t available on site"
 
-ใช้ prefix แล้วลิงก์ไป `/reports/` นอก Location — เพิ่ม `ProxyPass /reports/` ตามด้านบน
+โค้ดเก่าใช้ลิงก์ `/reports/...` นอก prefix — อัปเดตโค้ด (`git pull` + `npm run deploy`) ที่ใช้ relative `reports/...` แล้วลองใหม่  
+หรือชั่วคราวเพิ่ม `ProxyPass /reports/` ตามด้านบน
 
 ### `invalid_grant` หลังย้ายไป proxy
 

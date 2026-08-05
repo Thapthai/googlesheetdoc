@@ -132,19 +132,89 @@ http://localhost:4100/report_fac_delivery_clean_xls?date=22-06-2026&lg=th&price=
 
 ---
 
-## อัปเดตโค้ดหลัง Deploy แล้ว
+## กรณี pull โค้ดใหม่มาแล้ว
+
+เมื่อมีคน push / คุณ `git pull` โค้ดใหม่บน server ที่รัน PM2 อยู่แล้ว — ทำตามนี้:
+
+### ขั้นตอนสั้น (ใช้บ่อย)
 
 ```bash
-git pull          # หรือ copy ไฟล์ใหม่
-npm install       # ถ้ามี dependency เปลี่ยน
-npm run deploy    # build + restart
+cd /path/to/googleSheet
+git pull
+npm install          # แนะนำทุกครั้งหลัง pull (หรือเมื่อ package.json เปลี่ยน)
+npm run deploy       # = build + pm2 restart --update-env
+npm run pm2:status   # ตรวจว่า online
 ```
 
-ถ้าแก้เฉพาะ `.env` (ไม่แก้โค้ด):
+`npm run deploy` จะ:
+
+1. `tsc` สร้าง `dist/` ใหม่
+2. restart process `google-sheet-report`
+3. โหลด `.env` ใหม่ (`--update-env`)
+
+### Checklist หลัง pull
+
+| ตรวจ | รายละเอียด |
+|------|------------|
+| `.env` | **อย่า overwrite** — `git pull` ไม่ควรแตะ `.env` / `credentials.json` (อยู่ใน `.gitignore`) |
+| ตัวแปรใหม่ | เปิด `.env.example` เทียบกับ `.env` — ถ้ามี key ใหม่ให้เพิ่มใน `.env` แล้ว restart |
+| `npm install` | จำเป็นเมื่อ `package.json` / `package-lock.json` เปลี่ยน |
+| รายงานใหม่ | route ใหม่อัตโนมัติหลัง deploy (ดู `/` หรือ README) — **ไม่ต้อง** แก้ Apache ถ้ายังใช้ path เดิม |
+| Reverse proxy | แก้ Apache/Nginx เฉพาะเมื่อเปลี่ยน path / port ในเอกสาร |
+
+### ตัวอย่างเต็มบน Linux
+
+```bash
+cd /path/to/googleSheet
+
+git status
+git pull origin main          # หรือ branch ที่ใช้อยู่
+
+# ถ้ามี conflict ในไฟล์ที่แก้เองบน server — แก้ก่อน แล้วค่อย deploy
+npm install
+npm run deploy
+
+# ตรวจ
+npx pm2 status
+npx pm2 logs google-sheet-report --lines 30
+
+# ทดสอบ
+curl -s "http://127.0.0.1:7001/" | head
+# หรือเปิด browser ตาม PORT ใน .env / path proxy เช่น
+# http://<host>/demo-googledoc/mph/report_fac_delivery_clean_xls?date=22-06-2026
+```
+
+### กรณีพิเศษ
+
+**ยังไม่เคย `pm2:start` บนเครื่องนี้**
+
+```bash
+git pull
+npm install
+npm run pm2:start
+```
+
+อย่าใช้ `npm run deploy` ก่อน start ครั้งแรก — จะขึ้นว่า process ไม่พบ
+
+**แก้เฉพาะ `.env` (ไม่ได้ pull โค้ด)**
 
 ```bash
 npx pm2 restart google-sheet-report --update-env
 ```
+
+**pull แล้ว build พัง / status errored**
+
+```bash
+npm run pm2:logs
+npm run build          # ดู error จาก tsc
+# แก้แล้ว
+npm run deploy
+```
+
+**มีรายงาน / dependency ใหม่แต่ลืม install**
+
+อาการ: route 404 หรือ `Cannot find module ...`  
+แก้: `npm install` แล้ว `npm run deploy` อีกครั้ง
 
 ---
 
@@ -297,8 +367,10 @@ copy .env.example .env    # แก้ค่า
 npm run check-google
 npm run pm2:start
 
-# อัปเดตครั้งถัดไป
+# อัปเดตครั้งถัดไป (หลัง git pull)
+cd /path/to/googleSheet
 git pull
 npm install
 npm run deploy
+npm run pm2:status
 ```
